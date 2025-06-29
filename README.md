@@ -8,6 +8,7 @@ Une interface web moderne et intuitive pour gérer vos sauvegardes avec pCloud e
 - 📁 **Dossiers Complets** : Sauvegardez des dossiers entiers avec tous leurs sous-dossiers
 - 🗑️ **Suppression pCloud** : Supprimez des fichiers et dossiers directement sur pCloud
 - ☁️ **Synchronisation Flexible** : Trois modes de synchronisation (sync vers pCloud, copie vers pCloud, sync depuis pCloud)
+- 📊 **Progression Avancée** : Suivi détaillé fichier par fichier avec ETA et statuts en temps réel
 - ⚙️ **Configuration Simple** : Interface de configuration pour définir vos chemins de base
 - 🎨 **Interface Moderne** : Design sobre et moderne avec Bootstrap 5 et SweetAlert2
 - 📱 **Responsive** : Compatible mobile et desktop

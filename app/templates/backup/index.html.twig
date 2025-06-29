@@ -616,40 +616,75 @@ async function syncToCloud() {
     const confirmed = result.isConfirmed;
     if (!confirmed) return;
     
-    showProgress('Synchronisation vers pCloud', 'Synchronisation des éléments sélectionnés...');
+    showProgress('🔄 Synchronisation vers pCloud', `Traitement de ${fileCount} ${itemType}...`);
     
     try {
-        for (const localPath of localSelectedFiles) {
-            // Construire le chemin de destination en préservant la structure
-            let remotePath = currentPcloudPath;
-            if (remotePath && !remotePath.endsWith('/')) {
-                remotePath += '/';
-            }
-            
-            // Ajouter le nom du fichier/dossier
+        const filesArray = Array.from(localSelectedFiles);
+        let processedFiles = 0;
+        let allSuccess = true;
+        let errors = [];
+        
+        for (const localPath of filesArray) {
             const fileName = localPath.split('/').pop();
-            remotePath += fileName;
+            const isFolder = !fileName.includes('.');
             
-            const response = await fetch('{{ path('backup_sync_to_cloud') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    localPath: localPath,
-                    remotePath: remotePath
-                })
-            });
+            updateCurrentFile(fileName, 'Synchronisation en cours...', isFolder);
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
             
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.error || 'Erreur de synchronisation');
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            try {
+                // Construire le chemin de destination en préservant la structure
+                let remotePath = currentPcloudPath;
+                if (remotePath && !remotePath.endsWith('/')) {
+                    remotePath += '/';
+                }
+                remotePath += fileName;
+                
+                const response = await fetch('{{ path('backup_sync_to_cloud') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        localPath: localPath,
+                        remotePath: remotePath
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateCurrentFile(fileName, '✅ Synchronisé avec succès', isFolder);
+                } else {
+                    allSuccess = false;
+                    errors.push(`${fileName}: ${result.error}`);
+                    updateCurrentFile(fileName, '❌ Erreur de synchronisation', isFolder);
+                }
+                
+            } catch (error) {
+                allSuccess = false;
+                errors.push(`${fileName}: ${error.message}`);
+                updateCurrentFile(fileName, '❌ Erreur réseau', isFolder);
             }
+            
+            processedFiles++;
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        hideProgress();
-        showAlert('Synchronisation vers pCloud terminée avec succès!', 'success');
+        updateCurrentFile('Terminé', 'Actualisation de la liste...', false);
         await loadPcloudFiles(currentPcloudPath);
+        
+        hideProgress();
+        
+        if (allSuccess) {
+            showAlert(`Synchronisation vers pCloud terminée avec succès! ${fileCount} ${itemType} synchronisé(s).`, 'success');
+        } else {
+            showAlert(`Synchronisation terminée avec des erreurs: ${errors.length} échec(s) sur ${fileCount} ${itemType}.`, 'warning');
+            console.warn('Erreurs de synchronisation:', errors);
+        }
         
     } catch (error) {
         hideProgress();
@@ -680,40 +715,78 @@ async function copyToCloud() {
     const confirmed = result.isConfirmed;
     if (!confirmed) return;
     
-    showProgress('Copie vers pCloud', 'Copie des éléments sélectionnés...');
+    showProgress('📋 Copie vers pCloud', `Traitement de ${fileCount} ${itemType}...`);
     
     try {
-        for (const localPath of localSelectedFiles) {
-            // Construire le chemin de destination en préservant la structure
-            let remotePath = currentPcloudPath;
-            if (remotePath && !remotePath.endsWith('/')) {
-                remotePath += '/';
-            }
-            
-            // Ajouter le nom du fichier/dossier
+        const filesArray = Array.from(localSelectedFiles);
+        let processedFiles = 0;
+        let allSuccess = true;
+        let errors = [];
+        
+        for (const localPath of filesArray) {
             const fileName = localPath.split('/').pop();
-            remotePath += fileName;
-
-            const response = await fetch('{{ path('backup_copy_to_cloud') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    localPath: localPath,
-                    remotePath: remotePath
-                })
-            });
+            const isFolder = !fileName.includes('.');
             
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.error || 'Erreur de copie');
+            updateCurrentFile(fileName, 'Copie en cours...', isFolder);
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            try {
+                // Construire le chemin de destination en préservant la structure
+                let remotePath = currentPcloudPath;
+                if (remotePath && !remotePath.endsWith('/')) {
+                    remotePath += '/';
+                }
+                remotePath += fileName;
+
+                const response = await fetch('{{ path('backup_copy_to_cloud') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        localPath: localPath,
+                        remotePath: remotePath
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateCurrentFile(fileName, '✅ Copié avec succès', isFolder);
+                } else {
+                    allSuccess = false;
+                    errors.push(`${fileName}: ${result.error}`);
+                    updateCurrentFile(fileName, '❌ Erreur de copie', isFolder);
+                }
+                
+            } catch (error) {
+                allSuccess = false;
+                errors.push(`${fileName}: ${error.message}`);
+                updateCurrentFile(fileName, '❌ Erreur réseau', isFolder);
             }
+            
+            processedFiles++;
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        hideProgress();
-        showAlert('Copie vers pCloud terminée avec succès!', 'success');
+        updateCurrentFile('Terminé', 'Actualisation de la liste...', false);
         await loadPcloudFiles(currentPcloudPath);
+        
+        hideProgress();
+        
+        if (allSuccess) {
+            showAlert(`Copie vers pCloud terminée avec succès! ${fileCount} ${itemType} copié(s).`, 'success');
+        } else {
+            showAlert(`Copie terminée avec des erreurs: ${errors.length} échec(s) sur ${fileCount} ${itemType}.`, 'warning');
+            console.warn('Erreurs de copie:', errors);
+        }
+        
+        localSelectedFiles.clear();
+        updateSelections();
         
     } catch (error) {
         hideProgress();
@@ -744,40 +817,75 @@ async function syncFromCloud() {
     const confirmed = result.isConfirmed;
     if (!confirmed) return;
     
-    showProgress('Synchronisation depuis pCloud', 'Récupération des éléments sélectionnés...');
+    showProgress('⬇️ Synchronisation depuis pCloud', `Téléchargement de ${fileCount} ${itemType}...`);
     
     try {
-        for (const remotePath of pcloudSelectedFiles) {
-            // Construire le chemin de destination local
-            let localPath = currentLocalPath;
-            if (localPath && !localPath.endsWith('/')) {
-                localPath += '/';
-            }
-            
-            // Ajouter le nom du fichier/dossier
+        const filesArray = Array.from(pcloudSelectedFiles);
+        let processedFiles = 0;
+        let allSuccess = true;
+        let errors = [];
+        
+        for (const remotePath of filesArray) {
             const fileName = remotePath.split('/').pop();
-            localPath += fileName;
+            const isFolder = !fileName.includes('.');
             
-            const response = await fetch('{{ path('backup_sync_from_cloud') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    remotePath: remotePath,
-                    localPath: localPath
-                })
-            });
+            updateCurrentFile(fileName, 'Téléchargement en cours...', isFolder);
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
             
-            const result = await response.json();
-            if (!result.success) {
-                throw new Error(result.error || 'Erreur de synchronisation');
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            try {
+                // Construire le chemin de destination local
+                let localPath = currentLocalPath;
+                if (localPath && !localPath.endsWith('/')) {
+                    localPath += '/';
+                }
+                localPath += fileName;
+                
+                const response = await fetch('{{ path('backup_sync_from_cloud') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        remotePath: remotePath,
+                        localPath: localPath
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateCurrentFile(fileName, '✅ Téléchargé avec succès', isFolder);
+                } else {
+                    allSuccess = false;
+                    errors.push(`${fileName}: ${result.error}`);
+                    updateCurrentFile(fileName, '❌ Erreur de téléchargement', isFolder);
+                }
+                
+            } catch (error) {
+                allSuccess = false;
+                errors.push(`${fileName}: ${error.message}`);
+                updateCurrentFile(fileName, '❌ Erreur réseau', isFolder);
             }
+            
+            processedFiles++;
+            updateProgress(processedFiles, fileCount, Math.round((processedFiles / fileCount) * 100));
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
         }
         
-        hideProgress();
-        showAlert('Synchronisation depuis pCloud terminée avec succès!', 'success');
+        updateCurrentFile('Terminé', 'Actualisation de la liste...', false);
         await loadLocalFiles(currentLocalPath);
+        
+        hideProgress();
+        
+        if (allSuccess) {
+            showAlert(`Synchronisation depuis pCloud terminée avec succès! ${fileCount} ${itemType} téléchargé(s).`, 'success');
+        } else {
+            showAlert(`Synchronisation terminée avec des erreurs: ${errors.length} échec(s) sur ${fileCount} ${itemType}.`, 'warning');
+            console.warn('Erreurs de synchronisation:', errors);
+        }
         
     } catch (error) {
         hideProgress();

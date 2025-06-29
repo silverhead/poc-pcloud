@@ -266,6 +266,198 @@ class RcloneService
     }
 
     /**
+     * Synchronise avec progression en temps réel (Server-Sent Events)
+     */
+    public function syncToCloudWithProgress(array $localPaths, string $remotePath, callable $progressCallback = null): \Generator
+    {
+        $sourcePaths = array_map(fn($path) => $this->localBasePath . '/' . ltrim($path, '/'), $localPaths);
+        $destPath = 'pcloud:' . $this->pcloudBasePath . '/' . ltrim($remotePath, '/');
+        
+        // Construire la commande avec options de progression
+        $command = [
+            'rclone', 'sync', 
+            implode(',', $sourcePaths), 
+            $destPath, 
+            '--progress', 
+            '--stats=1s',
+            '--stats-one-line',
+            '--use-json-log'
+        ];
+        
+        if ($this->rcloneConfigPath) {
+            $command[] = '--config';
+            $command[] = $this->rcloneConfigPath;
+        }
+        
+        yield $this->executeWithProgress($command, $progressCallback);
+    }
+
+    /**
+     * Copie vers pCloud avec progression en temps réel
+     */
+    public function copyToCloudWithProgress(array $localPaths, string $remotePath, callable $progressCallback = null): \Generator
+    {
+        $sourcePaths = array_map(fn($path) => $this->localBasePath . '/' . ltrim($path, '/'), $localPaths);
+        $destPath = 'pcloud:' . $this->pcloudBasePath . '/' . ltrim($remotePath, '/');
+        
+        $command = [
+            'rclone', 'copy',
+            implode(',', $sourcePaths),
+            $destPath,
+            '--progress',
+            '--stats=1s',
+            '--stats-one-line',
+            '--use-json-log'
+        ];
+        
+        if ($this->rcloneConfigPath) {
+            $command[] = '--config';
+            $command[] = $this->rcloneConfigPath;
+        }
+        
+        yield $this->executeWithProgress($command, $progressCallback);
+    }
+
+    /**
+     * Synchronise depuis pCloud avec progression en temps réel
+     */
+    public function syncFromCloudWithProgress(array $remotePaths, string $localPath, callable $progressCallback = null): \Generator
+    {
+        $sourcePaths = array_map(fn($path) => 'pcloud:' . $this->pcloudBasePath . '/' . ltrim($path, '/'), $remotePaths);
+        $destPath = $this->localBasePath . '/' . ltrim($localPath, '/');
+        
+        $command = [
+            'rclone', 'sync',
+            implode(',', $sourcePaths),
+            $destPath,
+            '--progress',
+            '--stats=1s',
+            '--stats-one-line',
+            '--use-json-log'
+        ];
+        
+        if ($this->rcloneConfigPath) {
+            $command[] = '--config';
+            $command[] = $this->rcloneConfigPath;
+        }
+        
+        yield $this->executeWithProgress($command, $progressCallback);
+    }
+
+    /**
+     * Exécute une commande rclone avec parsing de progression en temps réel
+     */
+    private function executeWithProgress(array $command, callable $progressCallback = null): array
+    {
+        $process = new Process($command);
+        $process->setTimeout(3600);
+        
+        $output = '';
+        $error = '';
+        $lastStats = null;
+        
+        $process->run(function ($type, $buffer) use (&$output, &$error, &$lastStats, $progressCallback) {
+            if ($type === Process::ERR) {
+                $error .= $buffer;
+                
+                // Parser la sortie d'erreur pour les statistiques
+                $lines = explode("\n", $buffer);
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+                    
+                    $stats = $this->parseRcloneStats($line);
+                    if ($stats) {
+                        $lastStats = $stats;
+                        if ($progressCallback) {
+                            $progressCallback($stats);
+                        }
+                    }
+                }
+            } else {
+                $output .= $buffer;
+            }
+        });
+        
+        return [
+            'success' => $process->isSuccessful(),
+            'output' => $output,
+            'error' => $error,
+            'finalStats' => $lastStats
+        ];
+    }
+
+    /**
+     * Parse les statistiques de rclone depuis une ligne de sortie
+     */
+    private function parseRcloneStats(string $line): ?array
+    {
+        // Patterns pour parser différents formats de rclone
+        $patterns = [
+            // Format: Transferred: 12.345M / 123.456M, 45%, 1.234M/s, ETA 1m23s
+            '/Transferred:\s*([0-9.]+[KMGT]?B?)\s*\/\s*([0-9.]+[KMGT]?B?),\s*([0-9]+)%,\s*([0-9.]+[KMGT]?B?\/s),\s*ETA\s*([0-9hms]+)/',
+            // Format: * filename.ext: 50% /12.34M, 1.23M/s, 30s
+            '/\*\s*([^:]+):\s*([0-9]+)%\s*\/([0-9.]+[KMGT]?B?),\s*([0-9.]+[KMGT]?B?\/s),\s*([0-9hms]+)/',
+            // Format: Checks: 123 / 456, 78%
+            '/Checks:\s*([0-9]+)\s*\/\s*([0-9]+),\s*([0-9]+)%/',
+        ];
+        
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $line, $matches)) {
+                if (count($matches) >= 6) {
+                    // Format complet avec transfert
+                    return [
+                        'type' => 'transfer',
+                        'transferred' => $matches[1],
+                        'total' => $matches[2],
+                        'percentage' => (int)$matches[3],
+                        'speed' => $matches[4],
+                        'eta' => $matches[5],
+                        'rawLine' => $line
+                    ];
+                } elseif (count($matches) >= 4 && strpos($line, '*') === 0) {
+                    // Format fichier individuel
+                    return [
+                        'type' => 'file',
+                        'filename' => trim($matches[1]),
+                        'percentage' => (int)$matches[2],
+                        'size' => $matches[3],
+                        'speed' => $matches[4],
+                        'eta' => $matches[5] ?? '',
+                        'rawLine' => $line
+                    ];
+                } elseif (count($matches) >= 4 && strpos($line, 'Checks:') !== false) {
+                    // Format vérifications
+                    return [
+                        'type' => 'checks',
+                        'completed' => (int)$matches[1],
+                        'total' => (int)$matches[2],
+                        'percentage' => (int)$matches[3],
+                        'rawLine' => $line
+                    ];
+                }
+            }
+        }
+        
+        // Chercher le nom de fichier en cours de traitement
+        if (preg_match('/^([^:]+):\s*(.+)$/', $line, $matches)) {
+            $filename = trim($matches[1]);
+            $status = trim($matches[2]);
+            
+            if (!empty($filename) && !str_contains($filename, 'Transferred') && !str_contains($filename, 'Checks')) {
+                return [
+                    'type' => 'current_file',
+                    'filename' => $filename,
+                    'status' => $status,
+                    'rawLine' => $line
+                ];
+            }
+        }
+        
+        return null;
+    }
+
+    /**
      * Obtient les informations de configuration
      */
     public function getConfig(): array

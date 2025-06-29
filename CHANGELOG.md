@@ -1,6 +1,37 @@
 # Changelog - Gestionnaire de Sauvegardes pCloud
 
-## Version 2.0.1 - Interface SweetAlert (Dernière mise à jour)
+## Version 2.1.0 - Progression Avancée (Dernière mise à jour)
+
+### 📊 Fonctionnalités de Progression
+
+#### 🎯 Interface de Progression Détaillée
+- **Modal moderne** avec barre de progression globale et pourcentage en temps réel
+- **Suivi fichier par fichier** : Affichage du fichier actuellement en cours de traitement
+- **Icônes contextuelles** : Différenciation visuelle entre fichiers (📄) et dossiers (📁)
+- **Estimation ETA** : Calcul approximatif du temps restant basé sur la progression
+- **Compteurs détaillés** : X / Y fichiers traités avec statuts individuels
+
+#### ⚡ Traitement Optimisé
+- **Traitement séquentiel** : Chaque fichier/dossier traité individuellement pour un suivi précis
+- **Gestion d'erreurs robuste** : Continuité d'exécution même en cas d'erreur sur un fichier
+- **Rapports détaillés** : Affichage du nombre de succès/échecs en fin d'opération
+- **Messages de statut** : Retours visuels pour chaque étape (en cours, succès, erreur)
+
+#### 🎨 Améliorations UX
+- **Feedback visuel riche** : Codes couleur et animations pour chaque état
+- **Transparence totale** : L'utilisateur voit exactement ce qui se passe
+- **Design cohérent** : Harmonisation avec SweetAlert2 et Bootstrap 5
+- **Interface responsive** : Adaptation automatique mobile/desktop
+
+### 🔧 Améliorations Techniques
+- Nouvelles fonctions JavaScript `updateProgress()` et `updateCurrentFile()`
+- Délais configurables pour optimiser la visibilité de la progression
+- Système de collecte et logging des erreurs pour débogage
+- Reset automatique des sélections après opérations
+
+---
+
+## Version 2.0.1 - Interface SweetAlert
 
 ### 🎨 Améliorations Interface
 

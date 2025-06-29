@@ -286,16 +286,54 @@
             {% block body %}{% endblock %}
         </main>
 
-        <!-- Modal de progression -->
+        <!-- Modal de progression avancée -->
         <div class="progress-container" id="progressModal">
             <div class="progress-content">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">Chargement...</span>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="spinner-border text-primary me-3" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 id="progressTitle" class="mb-1">Synchronisation en cours...</h5>
+                        <small id="progressSubtitle" class="text-muted">Préparation...</small>
+                    </div>
                 </div>
-                <h5 id="progressTitle">Synchronisation en cours...</h5>
-                <p id="progressMessage" class="text-muted">Veuillez patienter pendant la synchronisation des fichiers.</p>
-                <div class="progress mb-3">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                
+                <!-- Progression globale -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span id="progressMessage" class="text-muted small">Progression globale</span>
+                        <span id="progressPercent" class="text-primary fw-bold">0%</span>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small id="progressCurrent" class="text-muted">0 / 0 fichiers</small>
+                        <small id="progressETA" class="text-muted"></small>
+                    </div>
+                </div>
+                
+                <!-- Fichier en cours -->
+                <div class="bg-light rounded p-3">
+                    <div class="d-flex align-items-center">
+                        <i id="currentFileIcon" class="fas fa-file text-primary me-2"></i>
+                        <div class="flex-grow-1">
+                            <div id="currentFileName" class="fw-bold text-truncate">En attente...</div>
+                            <div id="currentFileStatus" class="small text-muted">Prêt à démarrer</div>
+                        </div>
+                        <div id="currentFileProgress" class="text-end">
+                            <div class="small text-muted">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bouton d'annulation -->
+                <div class="mt-3 text-center">
+                    <button id="cancelOperationBtn" class="btn btn-outline-danger btn-sm" style="display: none;">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
                 </div>
             </div>
         </div>
@@ -329,12 +367,44 @@
 
             function showProgress(title = 'Opération en cours...', message = 'Veuillez patienter...') {
                 document.getElementById('progressTitle').textContent = title;
-                document.getElementById('progressMessage').textContent = message;
+                document.getElementById('progressSubtitle').textContent = message;
+                document.getElementById('progressMessage').textContent = 'Progression globale';
                 document.getElementById('progressModal').style.display = 'flex';
+                
+                // Reset progress
+                updateProgress(0, 0, 0);
+                updateCurrentFile('En attente...', 'Préparation...');
             }
 
             function hideProgress() {
                 document.getElementById('progressModal').style.display = 'none';
+            }
+
+            function updateProgress(current, total, percentage) {
+                document.getElementById('progressPercent').textContent = `${percentage}%`;
+                document.getElementById('progressBar').style.width = `${percentage}%`;
+                document.getElementById('progressCurrent').textContent = `${current} / ${total} fichiers`;
+                
+                // Estimation simple du temps restant
+                if (percentage > 0 && percentage < 100) {
+                    const eta = Math.round(((100 - percentage) / percentage) * 10); // Estimation basique
+                    document.getElementById('progressETA').textContent = `~${eta}s restants`;
+                } else {
+                    document.getElementById('progressETA').textContent = '';
+                }
+            }
+
+            function updateCurrentFile(filename, status, isFolder = false) {
+                document.getElementById('currentFileName').textContent = filename;
+                document.getElementById('currentFileStatus').textContent = status;
+                
+                // Changer l'icône selon le type
+                const icon = document.getElementById('currentFileIcon');
+                if (isFolder) {
+                    icon.className = 'fas fa-folder text-warning me-2';
+                } else {
+                    icon.className = 'fas fa-file text-primary me-2';
+                }
             }
 
             function showAlert(message, type = 'success') {
