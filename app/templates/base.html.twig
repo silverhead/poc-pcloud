@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Gestionnaire de Sauvegardes pCloud{% endblock %}</title>
+        
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Bootstrap Icons -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <!-- Font Awesome pour les icônes -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #f8fafc;
+                --accent-color: #0ea5e9;
+                --text-color: #1e293b;
+                --border-color: #e2e8f0;
+                --success-color: #10b981;
+                --warning-color: #f59e0b;
+                --danger-color: #ef4444;
+            }
+
+            body {
+                background-color: var(--secondary-color);
+                color: var(--text-color);
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .navbar {
+                background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+
+            .navbar-brand {
+                font-weight: 600;
+                font-size: 1.3rem;
+            }
+
+            .card {
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            }
+
+            .card-header {
+                background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+                border-bottom: 1px solid var(--border-color);
+                border-radius: 12px 12px 0 0 !important;
+                font-weight: 600;
+            }
+
+            .btn-primary {
+                background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+                border: none;
+                border-radius: 8px;
+                padding: 0.5rem 1.5rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            }
+
+            .btn-outline-primary {
+                border-color: var(--primary-color);
+                color: var(--primary-color);
+                border-radius: 8px;
+                font-weight: 500;
+            }
+
+            .btn-outline-primary:hover {
+                background: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .file-browser {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: white;
+            }
+
+            .file-item {
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #f1f5f9;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                display: flex;
+                align-items: center;
+            }
+
+            .file-item:hover {
+                background-color: #f8fafc;
+            }
+
+            .file-item:last-child {
+                border-bottom: none;
+            }
+
+            .file-item.selected {
+                background-color: #dbeafe;
+                border-left: 4px solid var(--primary-color);
+            }
+
+            .file-icon {
+                margin-right: 0.75rem;
+                font-size: 1.1rem;
+                width: 20px;
+                text-align: center;
+            }
+
+            .folder-icon {
+                color: #fbbf24;
+            }
+
+            .file-icon-default {
+                color: #6b7280;
+            }
+
+            .breadcrumb {
+                background: white;
+                border-radius: 8px;
+                padding: 0.75rem 1rem;
+                margin-bottom: 1rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+
+            .breadcrumb-item + .breadcrumb-item::before {
+                content: "›";
+                color: #6b7280;
+            }
+
+            .progress-container {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .progress-content {
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                min-width: 400px;
+                text-align: center;
+            }
+
+            .sync-buttons {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+
+            .alert {
+                border: none;
+                border-radius: 8px;
+                padding: 1rem 1.5rem;
+            }
+
+            .alert-success {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+            }
+
+            .alert-danger {
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+            }
+
+            .spinner-border-sm {
+                width: 1rem;
+                height: 1rem;
+            }
+
+            .text-muted {
+                color: #6b7280 !important;
+            }
+
+            .container-fluid {
+                padding: 2rem;
+            }
+
+            @media (max-width: 768px) {
+                .container-fluid {
+                    padding: 1rem;
+                }
+                
+                .sync-buttons {
+                    flex-direction: column;
+                }
+            }
+        </style>
+        
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ path('backup_index') }}">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                    Gestionnaire pCloud
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('backup_index') }}">
+                                <i class="fas fa-home me-1"></i>Accueil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('backup_config') }}">
+                                <i class="fas fa-cog me-1"></i>Configuration
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container-fluid">
+            {% block body %}{% endblock %}
+        </main>
+
+        <!-- Modal de progression -->
+        <div class="progress-container" id="progressModal">
+            <div class="progress-content">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <h5 id="progressTitle">Synchronisation en cours...</h5>
+                <p id="progressMessage" class="text-muted">Veuillez patienter pendant la synchronisation des fichiers.</p>
+                <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- JavaScript global -->
+        <script>
+            // Fonctions utilitaires globales
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            function formatDate(timestamp) {
+                return new Date(timestamp * 1000).toLocaleString('fr-FR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function showProgress(title = 'Opération en cours...', message = 'Veuillez patienter...') {
+                document.getElementById('progressTitle').textContent = title;
+                document.getElementById('progressMessage').textContent = message;
+                document.getElementById('progressModal').style.display = 'flex';
+            }
+
+            function hideProgress() {
+                document.getElementById('progressModal').style.display = 'none';
+            }
+
+            function showAlert(message, type = 'success') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                alertDiv.style.top = '20px';
+                alertDiv.style.right = '20px';
+                alertDiv.style.zIndex = '10000';
+                alertDiv.style.minWidth = '300px';
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Auto-supprimer après 5 secondes
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+
+            // Gestionnaire d'erreurs global
+            window.addEventListener('error', function(e) {
+                console.error('Erreur JavaScript:', e.error);
+                showAlert('Une erreur inattendue s\'est produite. Veuillez recharger la page.', 'danger');
+            });
+        </script>
+        
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

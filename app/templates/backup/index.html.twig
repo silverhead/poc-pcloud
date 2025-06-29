@@ -1,0 +1,651 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestionnaire de Sauvegardes - Accueil{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-cloud-upload-alt text-primary me-2"></i>
+                Gestionnaire de Sauvegardes pCloud
+            </h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" onclick="refreshBrowsers()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+                <a href="{{ path('backup_config') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-cog me-1"></i>Configuration
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Navigateur de fichiers local -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-server text-success me-2"></i>
+                    <span>Serveur Local</span>
+                </div>
+                <small class="text-muted">{{ config.localBasePath }}</small>
+            </div>
+            <div class="card-body p-0">
+                <!-- Fil d'Ariane Local -->
+                <div class="p-3 border-bottom">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0" id="localBreadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#" onclick="navigateLocal('')">
+                                    <i class="fas fa-home me-1"></i>Racine
+                                </a>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+                
+                <!-- Liste des fichiers locaux -->
+                <div class="file-browser" id="localFiles">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Chargement des fichiers...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted" id="localInfo">Sélectionnez des fichiers</small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="selectAllLocal()" title="Tout sélectionner">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearSelectionLocal()" title="Désélectionner">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigateur de fichiers pCloud -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-cloud text-info me-2"></i>
+                    <span>pCloud</span>
+                </div>
+                <small class="text-muted">{{ config.pcloudBasePath }}</small>
+            </div>
+            <div class="card-body p-0">
+                <!-- Fil d'Ariane pCloud -->
+                <div class="p-3 border-bottom">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0" id="pcloudBreadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#" onclick="navigatePcloud('')">
+                                    <i class="fas fa-cloud me-1"></i>Racine
+                                </a>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+                
+                <!-- Liste des fichiers pCloud -->
+                <div class="file-browser" id="pcloudFiles">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Chargement des fichiers pCloud...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted" id="pcloudInfo">Sélectionnez des fichiers</small>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-info" onclick="selectAllPcloud()" title="Tout sélectionner">
+                            <i class="fas fa-check-double"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="clearSelectionPcloud()" title="Désélectionner">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions de synchronisation -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exchange-alt me-2"></i>
+                    Actions de Synchronisation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" onclick="syncToCloud()" id="syncToCloudBtn">
+                                <i class="fas fa-cloud-upload-alt me-2"></i>
+                                Synchroniser vers pCloud
+                            </button>
+                            <small class="text-muted mt-1">Sync complète (supprime les fichiers en trop sur pCloud)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button class="btn btn-info btn-lg" onclick="copyToCloud()" id="copyToCloudBtn">
+                                <i class="fas fa-copy me-2"></i>
+                                Copier vers pCloud
+                            </button>
+                            <small class="text-muted mt-1">Copie simple (conserve tous les fichiers)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button class="btn btn-success btn-lg" onclick="syncFromCloud()" id="syncFromCloudBtn">
+                                <i class="fas fa-cloud-download-alt me-2"></i>
+                                Synchroniser depuis pCloud
+                            </button>
+                            <small class="text-muted mt-1">Récupère les fichiers depuis pCloud</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3 p-3 bg-light rounded">
+                    <h6 class="mb-2">
+                        <i class="fas fa-info-circle text-info me-1"></i>
+                        Sélections actuelles :
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Local:</strong> 
+                            <span id="localSelection" class="text-muted">Aucune sélection</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>pCloud:</strong> 
+                            <span id="pcloudSelection" class="text-muted">Aucune sélection</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentLocalPath = '';
+let currentPcloudPath = '';
+let localSelectedFiles = new Set();
+let pcloudSelectedFiles = new Set();
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    loadLocalFiles('');
+    loadPcloudFiles('');
+});
+
+// Chargement des fichiers locaux
+async function loadLocalFiles(path) {
+    try {
+        document.getElementById('localFiles').innerHTML = `
+            <div class="text-center p-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2 text-muted">Chargement des fichiers...</p>
+            </div>
+        `;
+        
+        const response = await fetch(`{{ path('backup_local_files') }}?path=${encodeURIComponent(path)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            currentLocalPath = data.currentPath;
+            displayLocalFiles(data.files);
+            updateLocalBreadcrumb(data.currentPath);
+        } else {
+            throw new Error(data.error || 'Erreur lors du chargement');
+        }
+    } catch (error) {
+        document.getElementById('localFiles').innerHTML = `
+            <div class="text-center p-4 text-danger">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <p>Erreur: ${error.message}</p>
+                <button class="btn btn-outline-primary btn-sm" onclick="loadLocalFiles('${path}')">
+                    <i class="fas fa-retry me-1"></i>Réessayer
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Chargement des fichiers pCloud
+async function loadPcloudFiles(path) {
+    try {
+        document.getElementById('pcloudFiles').innerHTML = `
+            <div class="text-center p-4">
+                <div class="spinner-border text-info" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2 text-muted">Chargement des fichiers pCloud...</p>
+            </div>
+        `;
+        
+        const response = await fetch(`{{ path('backup_pcloud_files') }}?path=${encodeURIComponent(path)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            currentPcloudPath = data.currentPath;
+            displayPcloudFiles(data.files);
+            updatePcloudBreadcrumb(data.currentPath);
+        } else {
+            throw new Error(data.error || 'Erreur lors du chargement');
+        }
+    } catch (error) {
+        document.getElementById('pcloudFiles').innerHTML = `
+            <div class="text-center p-4 text-danger">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <p>Erreur: ${error.message}</p>
+                <button class="btn btn-outline-info btn-sm" onclick="loadPcloudFiles('${path}')">
+                    <i class="fas fa-retry me-1"></i>Réessayer
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Affichage des fichiers locaux
+function displayLocalFiles(files) {
+    const container = document.getElementById('localFiles');
+    
+    if (files.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4 text-muted">
+                <i class="fas fa-folder-open fa-2x mb-2"></i>
+                <p>Aucun fichier dans ce dossier</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    files.forEach(file => {
+        const isSelected = localSelectedFiles.has(file.path);
+        const icon = file.type === 'directory' ? 
+            '<i class="fas fa-folder folder-icon"></i>' : 
+            '<i class="fas fa-file file-icon-default"></i>';
+        
+        html += `
+            <div class="file-item ${isSelected ? 'selected' : ''}" 
+                 onclick="${file.type === 'directory' ? `navigateLocal('${file.path}')` : `toggleLocalSelection('${file.path}')`}"
+                 title="${file.name}">
+                <span class="file-icon">${icon}</span>
+                <div class="flex-grow-1">
+                    <div class="fw-medium">${file.name}</div>
+                    <small class="text-muted">
+                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : ''}
+                        ${formatDate(file.modified)}
+                    </small>
+                </div>
+                ${file.type === 'file' ? `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                               onclick="event.stopPropagation(); toggleLocalSelection('${file.path}')">
+                    </div>
+                ` : '<i class="fas fa-chevron-right text-muted"></i>'}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    updateLocalInfo();
+}
+
+// Affichage des fichiers pCloud
+function displayPcloudFiles(files) {
+    const container = document.getElementById('pcloudFiles');
+    
+    if (files.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4 text-muted">
+                <i class="fas fa-cloud fa-2x mb-2"></i>
+                <p>Aucun fichier dans ce dossier</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    files.forEach(file => {
+        const isSelected = pcloudSelectedFiles.has(file.path);
+        const icon = file.type === 'directory' ? 
+            '<i class="fas fa-folder folder-icon"></i>' : 
+            '<i class="fas fa-file file-icon-default"></i>';
+        
+        html += `
+            <div class="file-item ${isSelected ? 'selected' : ''}" 
+                 onclick="${file.type === 'directory' ? `navigatePcloud('${file.path}')` : `togglePcloudSelection('${file.path}')`}"
+                 title="${file.name}">
+                <span class="file-icon">${icon}</span>
+                <div class="flex-grow-1">
+                    <div class="fw-medium">${file.name}</div>
+                    <small class="text-muted">
+                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : ''}
+                        ${formatDate(file.modified)}
+                    </small>
+                </div>
+                ${file.type === 'file' ? `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                               onclick="event.stopPropagation(); togglePcloudSelection('${file.path}')">
+                    </div>
+                ` : '<i class="fas fa-chevron-right text-muted"></i>'}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    updatePcloudInfo();
+}
+
+// Navigation
+function navigateLocal(path) {
+    loadLocalFiles(path);
+    localSelectedFiles.clear();
+}
+
+function navigatePcloud(path) {
+    loadPcloudFiles(path);
+    pcloudSelectedFiles.clear();
+}
+
+// Mise à jour des fils d'Ariane
+function updateLocalBreadcrumb(path) {
+    const breadcrumb = document.getElementById('localBreadcrumb');
+    let html = `
+        <li class="breadcrumb-item ${path === '' ? 'active' : ''}">
+            <a href="#" onclick="navigateLocal('')">
+                <i class="fas fa-home me-1"></i>Racine
+            </a>
+        </li>
+    `;
+    
+    if (path) {
+        const parts = path.split('/').filter(part => part);
+        let currentPath = '';
+        
+        parts.forEach((part, index) => {
+            currentPath += (currentPath ? '/' : '') + part;
+            const isLast = index === parts.length - 1;
+            
+            html += `
+                <li class="breadcrumb-item ${isLast ? 'active' : ''}">
+                    ${isLast ? part : `<a href="#" onclick="navigateLocal('${currentPath}')">${part}</a>`}
+                </li>
+            `;
+        });
+    }
+    
+    breadcrumb.innerHTML = html;
+}
+
+function updatePcloudBreadcrumb(path) {
+    const breadcrumb = document.getElementById('pcloudBreadcrumb');
+    let html = `
+        <li class="breadcrumb-item ${path === '' ? 'active' : ''}">
+            <a href="#" onclick="navigatePcloud('')">
+                <i class="fas fa-cloud me-1"></i>Racine
+            </a>
+        </li>
+    `;
+    
+    if (path) {
+        const parts = path.split('/').filter(part => part);
+        let currentPath = '';
+        
+        parts.forEach((part, index) => {
+            currentPath += (currentPath ? '/' : '') + part;
+            const isLast = index === parts.length - 1;
+            
+            html += `
+                <li class="breadcrumb-item ${isLast ? 'active' : ''}">
+                    ${isLast ? part : `<a href="#" onclick="navigatePcloud('${currentPath}')">${part}</a>`}
+                </li>
+            `;
+        });
+    }
+    
+    breadcrumb.innerHTML = html;
+}
+
+// Gestion des sélections
+function toggleLocalSelection(path) {
+    if (localSelectedFiles.has(path)) {
+        localSelectedFiles.delete(path);
+    } else {
+        localSelectedFiles.add(path);
+    }
+    updateLocalInfo();
+    updateSelections();
+    // Recharger l'affichage pour mettre à jour les cases cochées
+    loadLocalFiles(currentLocalPath);
+}
+
+function togglePcloudSelection(path) {
+    if (pcloudSelectedFiles.has(path)) {
+        pcloudSelectedFiles.delete(path);
+    } else {
+        pcloudSelectedFiles.add(path);
+    }
+    updatePcloudInfo();
+    updateSelections();
+    // Recharger l'affichage pour mettre à jour les cases cochées
+    loadPcloudFiles(currentPcloudPath);
+}
+
+function selectAllLocal() {
+    // Cette fonction sera implémentée en récupérant tous les fichiers visibles
+    showAlert('Fonction en cours de développement', 'info');
+}
+
+function selectAllPcloud() {
+    // Cette fonction sera implémentée en récupérant tous les fichiers visibles
+    showAlert('Fonction en cours de développement', 'info');
+}
+
+function clearSelectionLocal() {
+    localSelectedFiles.clear();
+    updateLocalInfo();
+    updateSelections();
+    loadLocalFiles(currentLocalPath);
+}
+
+function clearSelectionPcloud() {
+    pcloudSelectedFiles.clear();
+    updatePcloudInfo();
+    updateSelections();
+    loadPcloudFiles(currentPcloudPath);
+}
+
+// Mise à jour des informations
+function updateLocalInfo() {
+    const info = document.getElementById('localInfo');
+    const count = localSelectedFiles.size;
+    info.textContent = count > 0 ? `${count} fichier(s) sélectionné(s)` : 'Sélectionnez des fichiers';
+}
+
+function updatePcloudInfo() {
+    const info = document.getElementById('pcloudInfo');
+    const count = pcloudSelectedFiles.size;
+    info.textContent = count > 0 ? `${count} fichier(s) sélectionné(s)` : 'Sélectionnez des fichiers';
+}
+
+function updateSelections() {
+    const localSelection = document.getElementById('localSelection');
+    const pcloudSelection = document.getElementById('pcloudSelection');
+    
+    localSelection.textContent = localSelectedFiles.size > 0 ? 
+        `${localSelectedFiles.size} fichier(s) sélectionné(s)` : 'Aucune sélection';
+    
+    pcloudSelection.textContent = pcloudSelectedFiles.size > 0 ? 
+        `${pcloudSelectedFiles.size} fichier(s) sélectionné(s)` : 'Aucune sélection';
+}
+
+// Actions de synchronisation
+async function syncToCloud() {
+    if (localSelectedFiles.size === 0) {
+        showAlert('Veuillez sélectionner au moins un fichier local', 'warning');
+        return;
+    }
+    
+    const confirmed = confirm(`Synchroniser ${localSelectedFiles.size} fichier(s) vers pCloud?\n\nAttention: Cette opération supprime les fichiers en trop sur pCloud.`);
+    if (!confirmed) return;
+    
+    showProgress('Synchronisation vers pCloud', 'Synchronisation des fichiers sélectionnés...');
+    
+    try {
+        for (const localPath of localSelectedFiles) {
+            const remotePath = currentPcloudPath + '/' + localPath.split('/').pop();
+            
+            const response = await fetch('{{ path('backup_sync_to_cloud') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    localPath: localPath,
+                    remotePath: remotePath
+                })
+            });
+            
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Erreur de synchronisation');
+            }
+        }
+        
+        hideProgress();
+        showAlert('Synchronisation vers pCloud terminée avec succès!', 'success');
+        await loadPcloudFiles(currentPcloudPath);
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la synchronisation: ${error.message}`, 'danger');
+    }
+}
+
+async function copyToCloud() {
+    if (localSelectedFiles.size === 0) {
+        showAlert('Veuillez sélectionner au moins un fichier local', 'warning');
+        return;
+    }
+    
+    showProgress('Copie vers pCloud', 'Copie des fichiers sélectionnés...');
+    
+    try {
+        for (const localPath of localSelectedFiles) {
+            let remotePath = currentPcloudPath + '/'
+            
+            const pathOfFile = localPath.split('/');
+
+            if (pathOfFile.length > 1) {
+                for (let i = 0; i < pathOfFile.length-1; i++) {
+                    remotePath += pathOfFile[i] + '/'
+                }
+            }
+
+            const response = await fetch('{{ path('backup_copy_to_cloud') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    localPath: localPath,
+                    remotePath: remotePath
+                })
+            });
+            
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Erreur de copie');
+            }
+        }
+        
+        hideProgress();
+        showAlert('Copie vers pCloud terminée avec succès!', 'success');
+        await loadPcloudFiles(currentPcloudPath);
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la copie: ${error.message}`, 'danger');
+    }
+}
+
+async function syncFromCloud() {
+    if (pcloudSelectedFiles.size === 0) {
+        showAlert('Veuillez sélectionner au moins un fichier pCloud', 'warning');
+        return;
+    }
+    
+    const confirmed = confirm(`Synchroniser ${pcloudSelectedFiles.size} fichier(s) depuis pCloud?`);
+    if (!confirmed) return;
+    
+    showProgress('Synchronisation depuis pCloud', 'Récupération des fichiers sélectionnés...');
+    
+    try {
+        for (const remotePath of pcloudSelectedFiles) {
+            const localPath = currentLocalPath + '/' + remotePath.split('/').pop();
+            
+            const response = await fetch('{{ path('backup_sync_from_cloud') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    remotePath: remotePath,
+                    localPath: localPath
+                })
+            });
+            
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || 'Erreur de synchronisation');
+            }
+        }
+        
+        hideProgress();
+        showAlert('Synchronisation depuis pCloud terminée avec succès!', 'success');
+        await loadLocalFiles(currentLocalPath);
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la synchronisation: ${error.message}`, 'danger');
+    }
+}
+
+// Actualisation
+function refreshBrowsers() {
+    loadLocalFiles(currentLocalPath);
+    loadPcloudFiles(currentPcloudPath);
+    localSelectedFiles.clear();
+    pcloudSelectedFiles.clear();
+    updateSelections();
+}
+</script>
+{% endblock %} 

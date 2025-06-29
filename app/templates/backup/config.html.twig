@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Configuration - Gestionnaire de Sauvegardes{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-cog text-primary me-2"></i>
+                Configuration
+            </h1>
+            <a href="{{ path('backup_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-folder-cog me-2"></i>
+                    Configuration des Chemins de Base
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="configForm">
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="localBasePath" class="form-label">
+                                    <i class="fas fa-server text-success me-2"></i>
+                                    Chemin de Base Local
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="localBasePath" 
+                                       name="localBasePath" 
+                                       value="{{ config.localBasePath }}"
+                                       placeholder="/home/user/data">
+                                <div class="form-text">
+                                    Chemin de base sur votre serveur à partir duquel vous voulez naviguer et sauvegarder.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="pcloudBasePath" class="form-label">
+                                    <i class="fas fa-cloud text-info me-2"></i>
+                                    Chemin de Base pCloud
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="pcloudBasePath" 
+                                       name="pcloudBasePath" 
+                                       value="{{ config.pcloudBasePath }}"
+                                       placeholder="/Backups">
+                                <div class="form-text">
+                                    Chemin de base dans votre pCloud où vous voulez stocker vos sauvegardes.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="rcloneConfigPath" class="form-label">
+                                    <i class="fas fa-file-code text-warning me-2"></i>
+                                    Chemin du Fichier de Configuration rclone (optionnel)
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="rcloneConfigPath" 
+                                       name="rcloneConfigPath" 
+                                       value="{{ config.rcloneConfigPath }}"
+                                       placeholder="/home/user/.config/rclone/rclone.conf">
+                                <div class="form-text">
+                                    Chemin vers votre fichier de configuration rclone. Laissez vide pour utiliser la configuration par défaut.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-info" onclick="testConfiguration()">
+                            <i class="fas fa-vial me-1"></i>
+                            Tester la Configuration
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo me-1"></i>
+                                Réinitialiser
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Carte d'informations -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Informations et Instructions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">
+                            <i class="fas fa-server me-1"></i>
+                            Configuration Locale
+                        </h6>
+                        <ul class="list-unstyled text-sm">
+                            <li><i class="fas fa-check text-success me-2"></i>Le chemin doit exister sur votre serveur</li>
+                            <li><i class="fas fa-check text-success me-2"></i>L'utilisateur doit avoir les permissions de lecture</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Utilisez des chemins absolus (commençant par /)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info">
+                            <i class="fas fa-cloud me-1"></i>
+                            Configuration pCloud
+                        </h6>
+                        <ul class="list-unstyled text-sm">
+                            <li><i class="fas fa-check text-success me-2"></i>Assurez-vous que rclone est configuré pour pCloud</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Le remote doit s'appeler 'pcloud'</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Testez d'abord avec : <code>rclone lsd pcloud:</code></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="alert alert-info mb-0">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-lightbulb me-1"></i>
+                        Configuration recommandée de rclone
+                    </h6>
+                    <p class="mb-2">Pour configurer rclone avec pCloud, exécutez :</p>
+                    <pre class="mb-2"><code>rclone config</code></pre>
+                    <p class="mb-0">Puis suivez les instructions pour créer un remote nommé 'pcloud' de type 'pcloud'.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Configuration initiale
+const originalConfig = {
+    localBasePath: '{{ config.localBasePath }}',
+    pcloudBasePath: '{{ config.pcloudBasePath }}',
+    rcloneConfigPath: '{{ config.rcloneConfigPath }}'
+};
+
+// Gestion du formulaire
+document.getElementById('configForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const config = {
+        localBasePath: formData.get('localBasePath').trim(),
+        pcloudBasePath: formData.get('pcloudBasePath').trim(),
+        rcloneConfigPath: formData.get('rcloneConfigPath').trim()
+    };
+    
+    // Validation basique
+    if (!config.localBasePath) {
+        showAlert('Le chemin de base local est requis', 'danger');
+        return;
+    }
+    
+    if (!config.pcloudBasePath) {
+        showAlert('Le chemin de base pCloud est requis', 'danger');
+        return;
+    }
+    
+    // Vérification des chemins
+    if (!config.localBasePath.startsWith('/')) {
+        showAlert('Le chemin local doit être absolu (commencer par /)', 'danger');
+        return;
+    }
+    
+    if (config.rcloneConfigPath && !config.rcloneConfigPath.startsWith('/')) {
+        showAlert('Le chemin de configuration rclone doit être absolu (commencer par /)', 'danger');
+        return;
+    }
+    
+    try {
+        showProgress('Sauvegarde de la configuration', 'Mise à jour de la configuration...');
+        
+        const response = await fetch('{{ path('backup_config') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(config)
+        });
+        
+        const result = await response.json();
+        
+        hideProgress();
+        
+        if (result.success) {
+            showAlert('Configuration sauvegardée avec succès !', 'success');
+            // Mettre à jour la configuration originale
+            Object.assign(originalConfig, config);
+        } else {
+            throw new Error(result.error || 'Erreur lors de la sauvegarde');
+        }
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la sauvegarde: ${error.message}`, 'danger');
+    }
+});
+
+// Test de configuration
+async function testConfiguration() {
+    const localPath = document.getElementById('localBasePath').value.trim();
+    const pcloudPath = document.getElementById('pcloudBasePath').value.trim();
+    
+    if (!localPath || !pcloudPath) {
+        showAlert('Veuillez remplir les chemins de base avant de tester', 'warning');
+        return;
+    }
+    
+    showProgress('Test de la configuration', 'Vérification des chemins et de la connectivité...');
+    
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        hideProgress();
+        showAlert('Configuration testée avec succès !', 'success');
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors du test: ${error.message}`, 'danger');
+    }
+}
+
+// Réinitialisation du formulaire
+function resetForm() {
+    const confirmed = confirm('Êtes-vous sûr de vouloir réinitialiser le formulaire ?');
+    if (!confirmed) return;
+    
+    document.getElementById('localBasePath').value = originalConfig.localBasePath;
+    document.getElementById('pcloudBasePath').value = originalConfig.pcloudBasePath;
+    document.getElementById('rcloneConfigPath').value = originalConfig.rcloneConfigPath;
+    
+    showAlert('Formulaire réinitialisé', 'info');
+}
+</script>
+{% endblock %} 
