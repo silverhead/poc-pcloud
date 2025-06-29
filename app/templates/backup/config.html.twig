@@ -251,9 +251,19 @@ async function testConfiguration() {
 }
 
 // Réinitialisation du formulaire
-function resetForm() {
-    const confirmed = confirm('Êtes-vous sûr de vouloir réinitialiser le formulaire ?');
-    if (!confirmed) return;
+  async function resetForm() {
+        const result = await Swal.fire({
+            title: '🔄 Réinitialisation',
+            text: 'Êtes-vous sûr de vouloir réinitialiser le formulaire ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, réinitialiser',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true
+        });
+        if (!result.isConfirmed) return;
     
     document.getElementById('localBasePath').value = originalConfig.localBasePath;
     document.getElementById('pcloudBasePath').value = originalConfig.pcloudBasePath;

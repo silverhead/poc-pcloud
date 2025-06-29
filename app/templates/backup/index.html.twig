@@ -57,19 +57,19 @@
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted" id="localInfo">Sélectionnez des fichiers</small>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary" onclick="selectAllLocal()" title="Tout sélectionner">
-                            <i class="fas fa-check-double"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="clearSelectionLocal()" title="Désélectionner">
-                            <i class="fas fa-times"></i>
-                        </button>
+                            <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" id="localInfo">Sélectionnez des fichiers ou dossiers</small>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="selectAllLocal()" title="Tout sélectionner">
+                                <i class="fas fa-check-double"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="clearSelectionLocal()" title="Désélectionner">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 
@@ -107,19 +107,19 @@
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted" id="pcloudInfo">Sélectionnez des fichiers</small>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-info" onclick="selectAllPcloud()" title="Tout sélectionner">
-                            <i class="fas fa-check-double"></i>
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="clearSelectionPcloud()" title="Désélectionner">
-                            <i class="fas fa-times"></i>
-                        </button>
+                            <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" id="pcloudInfo">Sélectionnez des fichiers ou dossiers</small>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-info" onclick="selectAllPcloud()" title="Tout sélectionner">
+                                <i class="fas fa-check-double"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="clearSelectionPcloud()" title="Désélectionner">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>
@@ -136,31 +136,40 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="d-grid">
                             <button class="btn btn-primary btn-lg" onclick="syncToCloud()" id="syncToCloudBtn">
                                 <i class="fas fa-cloud-upload-alt me-2"></i>
                                 Synchroniser vers pCloud
                             </button>
-                            <small class="text-muted mt-1">Sync complète (supprime les fichiers en trop sur pCloud)</small>
+                            <small class="text-muted mt-1">Sync complète - Fichiers et dossiers complets (supprime les fichiers en trop sur pCloud)</small>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="d-grid">
                             <button class="btn btn-info btn-lg" onclick="copyToCloud()" id="copyToCloudBtn">
                                 <i class="fas fa-copy me-2"></i>
                                 Copier vers pCloud
                             </button>
-                            <small class="text-muted mt-1">Copie simple (conserve tous les fichiers)</small>
+                            <small class="text-muted mt-1">Copie simple - Fichiers et dossiers complets (conserve tous les fichiers)</small>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="d-grid">
                             <button class="btn btn-success btn-lg" onclick="syncFromCloud()" id="syncFromCloudBtn">
                                 <i class="fas fa-cloud-download-alt me-2"></i>
                                 Synchroniser depuis pCloud
                             </button>
-                            <small class="text-muted mt-1">Récupère les fichiers depuis pCloud</small>
+                            <small class="text-muted mt-1">Récupère les fichiers et dossiers complets depuis pCloud</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-grid">
+                            <button class="btn btn-danger btn-lg" onclick="deleteSelectedFromCloud()" id="deleteFromCloudBtn">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                Supprimer de pCloud
+                            </button>
+                            <small class="text-muted mt-1">⚠️ Supprime définitivement les éléments sélectionnés</small>
                         </div>
                     </div>
                 </div>
@@ -178,6 +187,38 @@
                         <div class="col-md-6">
                             <strong>pCloud:</strong> 
                             <span id="pcloudSelection" class="text-muted">Aucune sélection</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Section d'aide pour les dossiers complets et suppressions -->
+                <div class="mt-3 p-3 bg-primary bg-opacity-10 rounded border border-primary border-opacity-25">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="mb-2 text-primary">
+                                <i class="fas fa-folder-plus me-1"></i>
+                                💡 Sauvegarde de Dossiers Complets
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><i class="fas fa-check text-success me-2"></i><strong>Sélectionnez des dossiers</strong> avec les cases à cocher</li>
+                                <li><i class="fas fa-check text-success me-2"></i><strong>Tout le contenu</strong> sera sauvegardé automatiquement</li>
+                                <li><i class="fas fa-check text-success me-2"></i><strong>Structure préservée</strong> (sous-dossiers inclus)</li>
+                                <li><i class="fas fa-arrow-right text-info me-2"></i>Cliquez sur la <strong>flèche</strong> pour naviguer</li>
+                                <li><i class="fas fa-square-check text-info me-2"></i>Cliquez sur la <strong>case</strong> pour sélectionner</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-2 text-danger">
+                                <i class="fas fa-trash-alt me-1"></i>
+                                🗑️ Suppression sur pCloud
+                            </h6>
+                            <ul class="list-unstyled mb-0 small">
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i><strong>Bouton rouge individuel</strong> pour supprimer un élément</li>
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i><strong>Suppression multiple</strong> des éléments sélectionnés</li>
+                                <li><i class="fas fa-ban text-danger me-2"></i><strong>IRRÉVERSIBLE</strong> - Double confirmation requise</li>
+                                <li><i class="fas fa-folder text-danger me-2"></i><strong>Dossiers complets</strong> supprimés avec contenu</li>
+                                <li><i class="fas fa-shield-alt text-info me-2"></i><strong>Serveur local</strong> non affecté</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -293,22 +334,30 @@ function displayLocalFiles(files) {
         
         html += `
             <div class="file-item ${isSelected ? 'selected' : ''}" 
-                 onclick="${file.type === 'directory' ? `navigateLocal('${file.path}')` : `toggleLocalSelection('${file.path}')`}"
                  title="${file.name}">
                 <span class="file-icon">${icon}</span>
-                <div class="flex-grow-1">
+                <div class="flex-grow-1" onclick="${file.type === 'directory' ? `navigateLocal('${file.path}')` : `toggleLocalSelection('${file.path}')`}">
                     <div class="fw-medium">${file.name}</div>
                     <small class="text-muted">
-                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : ''}
+                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : 'Dossier • '}
                         ${formatDate(file.modified)}
                     </small>
                 </div>
-                ${file.type === 'file' ? `
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
-                               onclick="event.stopPropagation(); toggleLocalSelection('${file.path}')">
-                    </div>
-                ` : '<i class="fas fa-chevron-right text-muted"></i>'}
+                <div class="d-flex align-items-center gap-2">
+                    ${file.type === 'directory' ? `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); toggleLocalSelection('${file.path}')"
+                                   title="Sélectionner ce dossier">
+                        </div>
+                        <i class="fas fa-chevron-right text-muted" onclick="navigateLocal('${file.path}')" style="cursor: pointer;"></i>
+                    ` : `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); toggleLocalSelection('${file.path}')">
+                        </div>
+                    `}
+                </div>
             </div>
         `;
     });
@@ -340,22 +389,38 @@ function displayPcloudFiles(files) {
         
         html += `
             <div class="file-item ${isSelected ? 'selected' : ''}" 
-                 onclick="${file.type === 'directory' ? `navigatePcloud('${file.path}')` : `togglePcloudSelection('${file.path}')`}"
                  title="${file.name}">
                 <span class="file-icon">${icon}</span>
-                <div class="flex-grow-1">
+                <div class="flex-grow-1" onclick="${file.type === 'directory' ? `navigatePcloud('${file.path}')` : `togglePcloudSelection('${file.path}')`}">
                     <div class="fw-medium">${file.name}</div>
                     <small class="text-muted">
-                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : ''}
+                        ${file.type === 'file' ? formatBytes(file.size) + ' • ' : 'Dossier • '}
                         ${formatDate(file.modified)}
                     </small>
                 </div>
-                ${file.type === 'file' ? `
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
-                               onclick="event.stopPropagation(); togglePcloudSelection('${file.path}')">
-                    </div>
-                ` : '<i class="fas fa-chevron-right text-muted"></i>'}
+                <div class="d-flex align-items-center gap-2">
+                    ${file.type === 'directory' ? `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); togglePcloudSelection('${file.path}')"
+                                   title="Sélectionner ce dossier">
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteSinglePcloudItem('${file.path}', '${file.name}', 'dossier')" 
+                                title="Supprimer ce dossier" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-trash-alt" style="font-size: 0.75rem;"></i>
+                        </button>
+                        <i class="fas fa-chevron-right text-muted" onclick="navigatePcloud('${file.path}')" style="cursor: pointer;"></i>
+                    ` : `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" ${isSelected ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); togglePcloudSelection('${file.path}')">
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteSinglePcloudItem('${file.path}', '${file.name}', 'fichier')" 
+                                title="Supprimer ce fichier" style="padding: 0.25rem 0.5rem;">
+                            <i class="fas fa-trash-alt" style="font-size: 0.75rem;"></i>
+                        </button>
+                    `}
+                </div>
             </div>
         `;
     });
@@ -487,41 +552,83 @@ function clearSelectionPcloud() {
 function updateLocalInfo() {
     const info = document.getElementById('localInfo');
     const count = localSelectedFiles.size;
-    info.textContent = count > 0 ? `${count} fichier(s) sélectionné(s)` : 'Sélectionnez des fichiers';
+    if (count > 0) {
+        const itemType = count === 1 ? 'élément' : 'éléments';
+        info.textContent = `${count} ${itemType} sélectionné(s)`;
+    } else {
+        info.textContent = 'Sélectionnez des fichiers ou dossiers';
+    }
 }
 
 function updatePcloudInfo() {
     const info = document.getElementById('pcloudInfo');
     const count = pcloudSelectedFiles.size;
-    info.textContent = count > 0 ? `${count} fichier(s) sélectionné(s)` : 'Sélectionnez des fichiers';
+    if (count > 0) {
+        const itemType = count === 1 ? 'élément' : 'éléments';
+        info.textContent = `${count} ${itemType} sélectionné(s)`;
+    } else {
+        info.textContent = 'Sélectionnez des fichiers ou dossiers';
+    }
 }
 
 function updateSelections() {
     const localSelection = document.getElementById('localSelection');
     const pcloudSelection = document.getElementById('pcloudSelection');
     
-    localSelection.textContent = localSelectedFiles.size > 0 ? 
-        `${localSelectedFiles.size} fichier(s) sélectionné(s)` : 'Aucune sélection';
+    if (localSelectedFiles.size > 0) {
+        const count = localSelectedFiles.size;
+        const itemType = count === 1 ? 'élément' : 'éléments';
+        localSelection.textContent = `${count} ${itemType} sélectionné(s)`;
+    } else {
+        localSelection.textContent = 'Aucune sélection';
+    }
     
-    pcloudSelection.textContent = pcloudSelectedFiles.size > 0 ? 
-        `${pcloudSelectedFiles.size} fichier(s) sélectionné(s)` : 'Aucune sélection';
+    if (pcloudSelectedFiles.size > 0) {
+        const count = pcloudSelectedFiles.size;
+        const itemType = count === 1 ? 'élément' : 'éléments';
+        pcloudSelection.textContent = `${count} ${itemType} sélectionné(s)`;
+    } else {
+        pcloudSelection.textContent = 'Aucune sélection';
+    }
 }
 
 // Actions de synchronisation
 async function syncToCloud() {
     if (localSelectedFiles.size === 0) {
-        showAlert('Veuillez sélectionner au moins un fichier local', 'warning');
+        showAlert('Veuillez sélectionner au moins un fichier ou dossier local', 'warning');
         return;
     }
     
-    const confirmed = confirm(`Synchroniser ${localSelectedFiles.size} fichier(s) vers pCloud?\n\nAttention: Cette opération supprime les fichiers en trop sur pCloud.`);
+    const fileCount = localSelectedFiles.size;
+    const itemType = fileCount === 1 ? 'élément' : 'éléments';
+    const result = await Swal.fire({
+        title: '🔄 Synchronisation vers pCloud',
+        html: `Synchroniser <strong>${fileCount} ${itemType}</strong> vers pCloud?<br><br>
+               <span class="text-warning">⚠️ <strong>Attention:</strong> Cette opération supprime les fichiers en trop sur pCloud.</span>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, synchroniser',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    const confirmed = result.isConfirmed;
     if (!confirmed) return;
     
-    showProgress('Synchronisation vers pCloud', 'Synchronisation des fichiers sélectionnés...');
+    showProgress('Synchronisation vers pCloud', 'Synchronisation des éléments sélectionnés...');
     
     try {
         for (const localPath of localSelectedFiles) {
-            const remotePath = currentPcloudPath + '/' + localPath.split('/').pop();
+            // Construire le chemin de destination en préservant la structure
+            let remotePath = currentPcloudPath;
+            if (remotePath && !remotePath.endsWith('/')) {
+                remotePath += '/';
+            }
+            
+            // Ajouter le nom du fichier/dossier
+            const fileName = localPath.split('/').pop();
+            remotePath += fileName;
             
             const response = await fetch('{{ path('backup_sync_to_cloud') }}', {
                 method: 'POST',
@@ -552,23 +659,40 @@ async function syncToCloud() {
 
 async function copyToCloud() {
     if (localSelectedFiles.size === 0) {
-        showAlert('Veuillez sélectionner au moins un fichier local', 'warning');
+        showAlert('Veuillez sélectionner au moins un fichier ou dossier local', 'warning');
         return;
     }
     
-    showProgress('Copie vers pCloud', 'Copie des fichiers sélectionnés...');
+    const fileCount = localSelectedFiles.size;
+    const itemType = fileCount === 1 ? 'élément' : 'éléments';
+    const result = await Swal.fire({
+        title: '📋 Copie vers pCloud',
+        html: `Copier <strong>${fileCount} ${itemType}</strong> vers pCloud?<br><br>
+               <span class="text-info">📁 Les dossiers seront copiés avec tout leur contenu.</span>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, copier',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#0ea5e9',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    const confirmed = result.isConfirmed;
+    if (!confirmed) return;
+    
+    showProgress('Copie vers pCloud', 'Copie des éléments sélectionnés...');
     
     try {
         for (const localPath of localSelectedFiles) {
-            let remotePath = currentPcloudPath + '/'
-            
-            const pathOfFile = localPath.split('/');
-
-            if (pathOfFile.length > 1) {
-                for (let i = 0; i < pathOfFile.length-1; i++) {
-                    remotePath += pathOfFile[i] + '/'
-                }
+            // Construire le chemin de destination en préservant la structure
+            let remotePath = currentPcloudPath;
+            if (remotePath && !remotePath.endsWith('/')) {
+                remotePath += '/';
             }
+            
+            // Ajouter le nom du fichier/dossier
+            const fileName = localPath.split('/').pop();
+            remotePath += fileName;
 
             const response = await fetch('{{ path('backup_copy_to_cloud') }}', {
                 method: 'POST',
@@ -599,18 +723,40 @@ async function copyToCloud() {
 
 async function syncFromCloud() {
     if (pcloudSelectedFiles.size === 0) {
-        showAlert('Veuillez sélectionner au moins un fichier pCloud', 'warning');
+        showAlert('Veuillez sélectionner au moins un fichier ou dossier pCloud', 'warning');
         return;
     }
     
-    const confirmed = confirm(`Synchroniser ${pcloudSelectedFiles.size} fichier(s) depuis pCloud?`);
+    const fileCount = pcloudSelectedFiles.size;
+    const itemType = fileCount === 1 ? 'élément' : 'éléments';
+    const result = await Swal.fire({
+        title: '⬇️ Synchronisation depuis pCloud',
+        html: `Synchroniser <strong>${fileCount} ${itemType}</strong> depuis pCloud?<br><br>
+               <span class="text-success">📁 Les dossiers seront téléchargés avec tout leur contenu.</span>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, synchroniser',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true
+    });
+    const confirmed = result.isConfirmed;
     if (!confirmed) return;
     
-    showProgress('Synchronisation depuis pCloud', 'Récupération des fichiers sélectionnés...');
+    showProgress('Synchronisation depuis pCloud', 'Récupération des éléments sélectionnés...');
     
     try {
         for (const remotePath of pcloudSelectedFiles) {
-            const localPath = currentLocalPath + '/' + remotePath.split('/').pop();
+            // Construire le chemin de destination local
+            let localPath = currentLocalPath;
+            if (localPath && !localPath.endsWith('/')) {
+                localPath += '/';
+            }
+            
+            // Ajouter le nom du fichier/dossier
+            const fileName = remotePath.split('/').pop();
+            localPath += fileName;
             
             const response = await fetch('{{ path('backup_sync_from_cloud') }}', {
                 method: 'POST',
@@ -636,6 +782,168 @@ async function syncFromCloud() {
     } catch (error) {
         hideProgress();
         showAlert(`Erreur lors de la synchronisation: ${error.message}`, 'danger');
+    }
+}
+
+// Suppression d'un élément unique sur pCloud
+async function deleteSinglePcloudItem(path, name, type) {
+    const result = await Swal.fire({
+        title: '⚠️ Suppression définitive',
+        html: `Êtes-vous sûr de vouloir supprimer définitivement ce <strong>${type}</strong> ?<br><br>
+               <span class="text-primary">"${name}"</span><br><br>
+               <span class="text-danger"><strong>⚠️ Cette action est IRRÉVERSIBLE !</strong></span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        focusCancel: true
+    });
+    if (!result.isConfirmed) return;
+    
+    // Double confirmation pour les dossiers
+    if (type === 'dossier') {
+        const doubleResult = await Swal.fire({
+            title: '🗂️ Suppression de dossier complet',
+            html: `Vous allez supprimer le dossier <strong>"${name}"</strong> et <strong>TOUT SON CONTENU</strong>.<br><br>
+                   <span class="text-danger">Tous les fichiers et sous-dossiers seront définitivement perdus.</span><br><br>
+                   <strong>Êtes-vous absolument certain ?</strong>`,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: 'OUI, SUPPRIMER TOUT',
+            cancelButtonText: 'Non, annuler',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            reverseButtons: true,
+            focusCancel: true
+        });
+        if (!doubleResult.isConfirmed) return;
+    }
+    
+    showProgress('Suppression en cours', `Suppression de "${name}"...`);
+    
+    try {
+        const response = await fetch('{{ path('backup_delete_from_cloud') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                remotePath: path
+            })
+        });
+        
+        const result = await response.json();
+        
+        hideProgress();
+        
+        if (result.success) {
+            showAlert(`${type.charAt(0).toUpperCase() + type.slice(1)} "${name}" supprimé avec succès !`, 'success');
+            await loadPcloudFiles(currentPcloudPath);
+            // Retirer l'élément des sélections s'il était sélectionné
+            pcloudSelectedFiles.delete(path);
+            updateSelections();
+        } else {
+            throw new Error(result.error || 'Erreur lors de la suppression');
+        }
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la suppression: ${error.message}`, 'danger');
+    }
+}
+
+// Suppression des éléments sélectionnés sur pCloud
+async function deleteSelectedFromCloud() {
+    if (pcloudSelectedFiles.size === 0) {
+        showAlert('Veuillez sélectionner au moins un élément à supprimer', 'warning');
+        return;
+    }
+    
+    const itemCount = pcloudSelectedFiles.size;
+    const itemType = itemCount === 1 ? 'élément' : 'éléments';
+    
+    const result = await Swal.fire({
+        title: '⚠️ Suppression multiple',
+        html: `Vous allez supprimer définitivement <strong>${itemCount} ${itemType}</strong> de pCloud.<br><br>
+               <span class="text-danger"><strong>⚠️ Cette action est IRRÉVERSIBLE !</strong></span><br><br>
+               Êtes-vous sûr de vouloir continuer ?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Continuer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        focusCancel: true
+    });
+    if (!result.isConfirmed) return;
+    
+    // Confirmation finale
+    const finalResult = await Swal.fire({
+        title: '🚨 Dernière chance',
+        html: `<strong>Dernière confirmation</strong> avant suppression définitive de <strong>${itemCount} ${itemType}</strong>.<br><br>
+               <div class="text-center">
+                   <span class="text-success">✅ Clic sur "SUPPRIMER" = SUPPRESSION DÉFINITIVE</span><br>
+                   <span class="text-info">❌ Clic sur "ANNULER" = ANNULATION</span>
+               </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'SUPPRIMER DÉFINITIVEMENT',
+        cancelButtonText: 'ANNULER',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#10b981',
+        reverseButtons: true,
+        focusCancel: true
+    });
+    if (!finalResult.isConfirmed) return;
+    
+    showProgress('Suppression multiple en cours', `Suppression de ${itemCount} ${itemType}...`);
+    
+    try {
+        const pathsArray = Array.from(pcloudSelectedFiles);
+        
+        const response = await fetch('{{ path('backup_delete_multiple_from_cloud') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                remotePaths: pathsArray
+            })
+        });
+        
+        const result = await response.json();
+        
+        hideProgress();
+        
+        if (result.success) {
+            showAlert(`${result.summary}`, 'success');
+        } else {
+            showAlert(`${result.summary}`, 'warning');
+            
+            // Afficher les détails des erreurs
+            if (result.results) {
+                let errorDetails = '\n\nDétails des erreurs :\n';
+                result.results.forEach(item => {
+                    if (!item.success) {
+                        errorDetails += `- ${item.path}: ${item.error}\n`;
+                    }
+                });
+                console.error('Erreurs de suppression:', errorDetails);
+            }
+        }
+        
+        // Actualiser la liste et vider les sélections
+        await loadPcloudFiles(currentPcloudPath);
+        pcloudSelectedFiles.clear();
+        updateSelections();
+        
+    } catch (error) {
+        hideProgress();
+        showAlert(`Erreur lors de la suppression multiple: ${error.message}`, 'danger');
     }
 }
 

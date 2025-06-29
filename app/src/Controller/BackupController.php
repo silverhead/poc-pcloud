@@ -169,4 +169,52 @@ class BackupController extends AbstractController
         
         return $this->json(['success' => false, 'error' => 'Méthode non autorisée'], 405);
     }
+
+    #[Route('/delete-from-cloud', name: 'delete_from_cloud', methods: ['POST'])]
+    public function deleteFromCloud(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $remotePath = $data['remotePath'] ?? '';
+        
+        if (empty($remotePath)) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Chemin distant requis'
+            ], 400);
+        }
+        
+        try {
+            $result = $this->rcloneService->deleteFromCloud($remotePath);
+            return $this->json($result);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/delete-multiple-from-cloud', name: 'delete_multiple_from_cloud', methods: ['POST'])]
+    public function deleteMultipleFromCloud(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $remotePaths = $data['remotePaths'] ?? [];
+        
+        if (empty($remotePaths) || !is_array($remotePaths)) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Liste des chemins distants requise'
+            ], 400);
+        }
+        
+        try {
+            $result = $this->rcloneService->deleteMultipleFromCloud($remotePaths);
+            return $this->json($result);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 } 

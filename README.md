@@ -5,11 +5,14 @@ Une interface web moderne et intuitive pour gérer vos sauvegardes avec pCloud e
 ## Fonctionnalités
 
 - 🗂️ **Navigation Bi-directionnelle** : Naviguez facilement dans vos fichiers locaux et pCloud
+- 📁 **Dossiers Complets** : Sauvegardez des dossiers entiers avec tous leurs sous-dossiers
+- 🗑️ **Suppression pCloud** : Supprimez des fichiers et dossiers directement sur pCloud
 - ☁️ **Synchronisation Flexible** : Trois modes de synchronisation (sync vers pCloud, copie vers pCloud, sync depuis pCloud)
 - ⚙️ **Configuration Simple** : Interface de configuration pour définir vos chemins de base
-- 🎨 **Interface Moderne** : Design sobre et moderne avec Bootstrap 5
+- 🎨 **Interface Moderne** : Design sobre et moderne avec Bootstrap 5 et SweetAlert2
 - 📱 **Responsive** : Compatible mobile et desktop
 - 🔄 **Temps Réel** : Actualisation automatique et indicateurs de progression
+- 💎 **Notifications Élégantes** : Popups et confirmations modernes avec SweetAlert2
 
 ## Prérequis
 
@@ -71,28 +74,40 @@ Ouvrez votre navigateur à l'adresse : `http://localhost:7080`
 - Cliquez sur les dossiers pour naviguer
 - Utilisez les fils d'Ariane pour revenir en arrière
 
-### 3. Sélection de Fichiers
+### 3. Sélection de Fichiers et Dossiers
 
-- Cliquez sur les fichiers (pas les dossiers) pour les sélectionner
-- Utilisez les boutons "Tout sélectionner" et "Désélectionner" 
-- Les fichiers sélectionnés apparaissent en surbrillance
+- **Fichiers :** Cliquez sur les fichiers pour les sélectionner
+- **Dossiers :** Utilisez les cases à cocher pour sélectionner des dossiers complets
+- **Navigation :** Cliquez sur la flèche → pour entrer dans un dossier
+- **Sélection multiple :** Utilisez les boutons "Tout sélectionner" et "Désélectionner"
+- Les éléments sélectionnés apparaissent en surbrillance
 
 ### 4. Actions de Synchronisation
 
 #### Synchroniser vers pCloud
-- Sélectionnez des fichiers locaux
+- Sélectionnez des fichiers ou **dossiers complets** locaux
 - Cliquez sur "Synchroniser vers pCloud"
 - ⚠️ **Attention** : Supprime les fichiers en trop sur pCloud (synchronisation exacte)
+- 📁 **Dossiers** : Tout le contenu et les sous-dossiers sont synchronisés
 
 #### Copier vers pCloud
-- Sélectionnez des fichiers locaux  
+- Sélectionnez des fichiers ou **dossiers complets** locaux  
 - Cliquez sur "Copier vers pCloud"
 - ✅ **Sécurisé** : Conserve tous les fichiers existants sur pCloud
+- 📁 **Dossiers** : Structure complète préservée avec tous les sous-dossiers
 
 #### Synchroniser depuis pCloud
-- Sélectionnez des fichiers pCloud
+- Sélectionnez des fichiers ou **dossiers complets** pCloud
 - Cliquez sur "Synchroniser depuis pCloud"
-- Récupère les fichiers sélectionnés sur votre serveur local
+- Récupère les éléments sélectionnés sur votre serveur local
+- 📁 **Dossiers** : Télécharge l'intégralité du dossier et ses sous-dossiers
+
+#### Supprimer de pCloud
+- **Suppression individuelle** : Cliquez sur le bouton rouge 🗑️ à côté de chaque élément
+- **Suppression multiple** : Sélectionnez plusieurs éléments et cliquez sur "Supprimer de pCloud"
+- ⚠️ **ATTENTION** : Les suppressions sont définitives et irréversibles
+- 🛡️ **Sécurité** : Double confirmation requise pour les dossiers
+- 🗂️ **Dossiers complets** : Supprime le dossier et tout son contenu
 
 ## Structure du Projet
 
@@ -136,6 +151,8 @@ RCLONE_CONFIG_PATH=/path/to/rclone.conf
 - `POST /backup/sync-to-cloud` - Synchronisation vers pCloud
 - `POST /backup/copy-to-cloud` - Copie vers pCloud
 - `POST /backup/sync-from-cloud` - Synchronisation depuis pCloud
+- `POST /backup/delete-from-cloud` - Suppression d'un élément sur pCloud
+- `POST /backup/delete-multiple-from-cloud` - Suppression multiple sur pCloud
 
 ## Sécurité
 

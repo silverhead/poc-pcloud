@@ -190,6 +190,82 @@ class RcloneService
     }
 
     /**
+     * Supprime un fichier ou dossier sur pCloud
+     */
+    public function deleteFromCloud(string $remotePath): array
+    {
+        $fullRemotePath = 'pcloud:' . $this->pcloudBasePath . '/' . ltrim($remotePath, '/');
+        
+        // Utiliser 'rclone deletefile' pour les fichiers et 'rclone purge' pour les dossiers
+        // On commence par tenter de supprimer comme un dossier, puis comme un fichier si ça échoue
+        $command = ['rclone', 'purge', $fullRemotePath];
+        
+        if ($this->rcloneConfigPath) {
+            $command[] = '--config';
+            $command[] = $this->rcloneConfigPath;
+        }
+        
+        $process = new Process($command);
+        $process->setTimeout(300); // 5 minutes de timeout pour les suppressions
+        $process->run();
+        
+        // Si la suppression comme dossier échoue, essayer comme fichier
+        if (!$process->isSuccessful()) {
+            $command = ['rclone', 'deletefile', $fullRemotePath];
+            
+            if ($this->rcloneConfigPath) {
+                $command[] = '--config';
+                $command[] = $this->rcloneConfigPath;
+            }
+            
+            $process = new Process($command);
+            $process->setTimeout(300);
+            $process->run();
+        }
+        
+        return [
+            'success' => $process->isSuccessful(),
+            'output' => $process->getOutput(),
+            'error' => $process->getErrorOutput()
+        ];
+    }
+
+    /**
+     * Supprime plusieurs fichiers ou dossiers sur pCloud
+     */
+    public function deleteMultipleFromCloud(array $remotePaths): array
+    {
+        $results = [];
+        $successCount = 0;
+        $errorCount = 0;
+        
+        foreach ($remotePaths as $remotePath) {
+            $result = $this->deleteFromCloud($remotePath);
+            $results[] = [
+                'path' => $remotePath,
+                'success' => $result['success'],
+                'error' => $result['error']
+            ];
+            
+            if ($result['success']) {
+                $successCount++;
+            } else {
+                $errorCount++;
+            }
+        }
+        
+        return [
+            'success' => $errorCount === 0,
+            'results' => $results,
+            'successCount' => $successCount,
+            'errorCount' => $errorCount,
+            'summary' => $errorCount === 0 ? 
+                "Tous les éléments ont été supprimés avec succès" : 
+                "{$successCount} supprimés avec succès, {$errorCount} erreurs"
+        ];
+    }
+
+    /**
      * Obtient les informations de configuration
      */
     public function getConfig(): array

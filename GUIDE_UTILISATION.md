@@ -44,11 +44,25 @@ rclone config
 - Cliquez sur les dossiers pour naviguer
 
 ### Synchronisation
-1. **Sélectionnez** les fichiers (cases à cocher)
+1. **Sélectionnez** les fichiers ou **dossiers complets** (cases à cocher)
 2. **Choisissez l'action :**
    - 🔄 **Sync vers pCloud** : Synchronisation exacte (supprime les fichiers en trop)
-   - 📋 **Copier vers pCloud** : Copie simple (garde tout)
+   - 📋 **Copier vers pCloud** : Copie simple (garde tout) - **Recommandé pour les dossiers**
    - ⬇️ **Sync depuis pCloud** : Récupère depuis pCloud
+   - 🗑️ **Supprimer de pCloud** : Supprime définitivement les éléments sélectionnés
+
+### 🆕 Sauvegarde de Dossiers Complets
+- ✅ **Sélectionnez un dossier** avec sa case à cocher
+- ✅ **Tout le contenu** est sauvegardé automatiquement
+- ✅ **Structure préservée** (tous les sous-dossiers)
+- ✅ **Gestion automatique** des gros dossiers
+
+### 🗑️ Suppression sur pCloud
+- 🔴 **Bouton rouge individuel** à côté de chaque élément
+- 📋 **Suppression multiple** via sélection + bouton "Supprimer de pCloud"
+- ⚠️ **IRRÉVERSIBLE** : Double confirmation pour éviter les erreurs
+- 🗂️ **Dossiers** : Tout le contenu est supprimé définitivement
+- 🛡️ **Sécurité** : Le serveur local n'est jamais affecté
 
 ## 🛠️ Commandes Utiles
 
